@@ -1,36 +1,26 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
+using StockCli.src.Commands.GetStockMetric;
+using StockCli.src.Service;
 
-public class GreetCommand : Command<GreetCommand.Settings>
+
+namespace StockCli;
+class Program
 {
-    public static void Main(string[] args)
+    static async Task<int> Main(string[] args)
     {
-        var app = new CommandApp();
+        var services = new ServiceCollection();
+        services.AddSingleton<IStockService, StockService>();
+
+        var registrar = new TypeRegistrar(services);
+
+        var app = new CommandApp(registrar);
         app.Configure(config =>
         {
-            config.AddCommand<GreetCommand>("greet");
+            config.AddCommand<GetStockMetricCommand>("--get-stock-metric")
+                .WithDescription("Retrieve stock metric data for a given symbol");
         });
 
-        app.Run(args);
-    }
-    public class Settings : CommandSettings
-    {
-        [CommandArgument(0, "<name>")]
-        [Description("The name to greet")]
-        public string Name { get; init; } = string.Empty;
-  
-        [CommandOption("-c|--count")]
-        [Description("Number of times to greet")]
-        [DefaultValue(1)]
-        public int Count { get; init; } = 1;
-    }
-  
-    public override int Execute(CommandContext context, Settings settings, CancellationToken cancellation)
-    {
-        for (var i = 0; i < settings.Count; i++)
-        {
-            System.Console.WriteLine($"Hello, {settings.Name}!");
-        }
-        return 0;
+        return await app.RunAsync(args);
     }
 }
