@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "EISBfJtuBlQ=",
+  "success": true,
+  "projectFilePath": "C:\\Git\\educational-notebooks\\StockCli\\StockCli.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\lsanc\\.nuget\\packages\\spectre.console\\0.53.1\\spectre.console.0.53.1.nupkg.sha512",
+    "C:\\Users\\lsanc\\.nuget\\packages\\spectre.console.cli\\0.53.1\\spectre.console.cli.0.53.1.nupkg.sha512"
+  ],
+  "logs": []
+}
