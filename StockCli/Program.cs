@@ -10,14 +10,19 @@ class Program
     static async Task<int> Main(string[] args)
     {
         var services = new ServiceCollection();
+        services.AddHttpClient("StockApiClient", client =>
+        {
+            client.BaseAddress = new Uri("https://www.alphavantage.co/query?function=OVERVIEW");
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        });
         services.AddSingleton<IStockService, StockService>();
 
-        var registrar = new TypeRegistrar(services);
+        var registrarSpectreConsole = new TypeRegistrar(services);
 
-        var app = new CommandApp(registrar);
+        var app = new CommandApp(registrarSpectreConsole);
         app.Configure(config =>
         {
-            config.AddCommand<GetStockMetricCommand>("--get-stock-metric")
+            config.AddCommand<GetStockMetricCommand>("get-stock-metric")
                 .WithDescription("Retrieve stock metric data for a given symbol");
         });
 

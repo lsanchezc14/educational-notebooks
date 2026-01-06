@@ -5,7 +5,7 @@ namespace StockCli.src.Commands.GetStockMetric
 {
     public class GetStockMetricSettings : CommandSettings
     {
-        [CommandArgument(0, "<symbol>")]
+        [CommandOption("-s|--symbol")]
         [Description("The stock symbol to retrieve metrics for")]
         public string Symbol { get; init; } = string.Empty;
 
