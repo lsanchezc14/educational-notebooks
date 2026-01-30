@@ -1,0 +1,209 @@
+﻿@page "/setup/v1/Telescope/{InstanceID:int}/setup"
+@using ASCOM.Alpaca.Clients
+@using ASCOM.Alpaca.Discovery
+@using ASCOM.Common
+@using SeestarWhiska.DeviceAccess
+
+<h3>Telescope Setup</h3>
+
+@if (!telescope.telescopeConnected)
+{
+    <button @onclick="DiscoverDevicesAsync">Discover Devices</button>
+    <h4 style="color: red; font-weight: bold;">Not connected to any device</h4>
+}
+
+@if (!string.IsNullOrEmpty(telescope.deviceDescription))
+{
+    <h4 style="color: green; font-weight: bold;">Connected to this device: @telescope.deviceDescription</h4>
+    <h4 style="color: blue; font-weight: bold;">At home?: @telescope.AtHome</h4>
+    <button @onclick="GoHome">Go Home</button>
+    <button @onclick="DisconnectTelescopeAsync">Disconnect</button>
+}
+else if (telescope.ascomDeviceList != null && telescope.ascomDeviceList.Count > 0)
+{
+    <h4>Discovered Devices:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Host Name</th>
+                <th>Service Type</th>
+                <th>IP Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var device in telescope.ascomDeviceList)
+            {
+                <tr>
+                    <td>@device.HostName</td>
+                    <td>@device.ServiceType</td>
+                    <td>@device.IpAddress</td>
+                    <td>
+                        <button @onclick="() => ConnectTelescopeAsync(device)">Connect</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (ASCOM.Alpaca.DeviceManager.Telescopes.ContainsKey(InstanceID))
+{
+    <p>Add your device setup and control functions here</p>
+}
+else
+{
+    <h3>This device does not exist and cannot be configured</h3>
+}
+
+@if (telescope.telescopeConnected)
+{
+    <h4>Control Telescope</h4>
+    <div class="arrow-buttons">
+        <button class="arrow up" @onclick="OnUpClick">&#8593;</button>
+        <div>
+            <button class="arrow left" @onclick="OnLeftClick">&#8592;</button>
+            <button class="arrow right" @onclick="OnRightClick">&#8594;</button>
+        </div>
+        <button class="arrow down" @onclick="OnDownClick">&#8595;</button>
+    </div>
+
+    <style>
+        .arrow-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .arrow-buttons > div {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        .arrow {
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            border-radius: 8px;
+            border: 1px solid #888;
+            background: #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .arrow:hover {
+            background: #d0e0ff;
+        }
+    </style>
+    <h4>Devices details:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Supported Actions</th>
+                <th>Driver Info</th>
+                <th>Driver Version</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@telescope.Name</td>
+                <td>@telescope.SupportedActions</td>
+                <td>@telescope.DriverInfo</td>
+                <td>@telescope.DriverVersion</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Telescope Properties</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>AlignmentMode</td><td>@telescope.AlignmentMode</td></tr>
+            <tr><td>Altitude</td><td>@telescope.Altitude</td></tr>
+            <tr><td>AtPark</td><td>@telescope.AtPark</td></tr>
+            <tr><td>Azimuth</td><td>@telescope.Azimuth</td></tr>
+            <tr><td>Declination</td><td>@telescope.Declination</td></tr>
+            <tr><td>DeclinationRate</td><td>@telescope.DeclinationRate</td></tr>
+            <tr><td>GuideRateDeclination</td><td>@telescope.GuideRateDeclination</td></tr>
+            <tr><td>GuideRateRightAscension</td><td>@telescope.GuideRateRightAscension</td></tr>
+            <tr><td>UTCDate</td><td>@telescope.UTCDate</td></tr>
+        </tbody>
+    </table>
+
+    <h4>Capabilities</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>CanSlew</td><td>@telescope.CanSlew.ToString()</td></tr>
+            <tr><td>CanSlewAltAz</td><td>@telescope.CanSlewAltAz.ToString()</td></tr>
+            <tr><td>CanSlewAltAzAsync</td><td>@telescope.CanSlewAltAzAsync.ToString()</td></tr>
+            <tr><td>CanSlewAsync</td><td>@telescope.CanSlewAsync.ToString()</td></tr>
+            <tr><td>CanFindHome</td><td>@telescope.CanFindHome.ToString()</td></tr>
+            <tr><td>CanPark</td><td>@telescope.CanPark.ToString()</td></tr>
+            <tr><td>CanPulseGuide</td><td>@telescope.CanPulseGuide.ToString()</td></tr>
+            <tr><td>CanSetDeclinationRate</td><td>@telescope.CanSetDeclinationRate.ToString()</td></tr>
+            <tr><td>CanSetGuideRates</td><td>@telescope.CanSetGuideRates.ToString()</td></tr>
+            <tr><td>CanSetPark</td><td>@telescope.CanSetPark.ToString()</td></tr>
+            <tr><td>CanSetPierSide</td><td>@telescope.CanSetPierSide.ToString()</td></tr>
+            <tr><td>CanSetRightAscensionRate</td><td>@telescope.CanSetRightAscensionRate.ToString()</td></tr>
+            <tr><td>CanSetTracking</td><td>@telescope.CanSetTracking.ToString()</td></tr>
+            <tr><td>CanSync</td><td>@telescope.CanSync.ToString()</td></tr>
+            <tr><td>CanSyncAltAz</td><td>@telescope.CanSyncAltAz.ToString()</td></tr>
+            <tr><td>CanUnpark</td><td>@telescope.CanUnpark.ToString()</td></tr>
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public int InstanceID { get; set; }
+    private TelescopeV1 telescope = new TelescopeV1();
+
+    private async Task DiscoverDevicesAsync()
+    {
+        await Task.Run(() => telescope.DiscoverDevicesAsync());
+        StateHasChanged();
+    }
+
+    private async Task ConnectTelescopeAsync(AscomDevice device)
+    {
+        await Task.Run(() => telescope.ConnectAsync(device));
+        StateHasChanged();
+    }
+
+    private async Task DisconnectTelescopeAsync()
+    {
+        await Task.Run(() => telescope.Disconnect());
+        StateHasChanged();
+    }
+
+    private void OnUpClick()
+    {
+        // TODO: Add logic to move telescope up
+    }
+    private void OnDownClick()
+    {
+        // TODO: Add logic to move telescope down
+    }
+    private void OnLeftClick()
+    {
+        // TODO: Add logic to move telescope left
+    }
+    private void OnRightClick()
+    {
+        // TODO: Add logic to move telescope right
+    }
+
+    private void GoHome()
+    {
+        telescope.FindHome();
+    }
+}
