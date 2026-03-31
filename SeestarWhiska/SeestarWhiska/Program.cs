@@ -138,6 +138,7 @@ namespace SeestarWhiska
             //There are pages already included for the first device of each device type.
             //ASCOM.Alpaca.DeviceManager.LoadSafetyMonitor(0, new DeviceAccess.BasicMonitor(), "Really Basic Safety Monitor", ServerSettings.GetDeviceUniqueId("SafetyMonitor", 0));
             ASCOM.Alpaca.DeviceManager.LoadTelescope(0, new DeviceAccess.TelescopeV1(), "Seestar Telescope", ServerSettings.GetDeviceUniqueId("Telescope", 0));
+            
             #region Finish Building and Start server
 
             // Add services to the container.
@@ -203,6 +204,7 @@ namespace SeestarWhiska
             });
 
             //Start the Alpaca Server
+            
             app.Run();
         }
 

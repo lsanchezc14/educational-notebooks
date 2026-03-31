@@ -3,23 +3,26 @@
 @using ASCOM.Alpaca.Discovery
 @using ASCOM.Common
 @using SeestarWhiska.DeviceAccess
+@using ASCOM.Common.DeviceInterfaces
 
 <h3>Telescope Setup</h3>
 
-@if (!telescope.telescopeConnected)
+@if (!telescope.TelescopeConnected)
 {
     <button @onclick="DiscoverDevicesAsync">Discover Devices</button>
     <h4 style="color: red; font-weight: bold;">Not connected to any device</h4>
 }
 
-@if (!string.IsNullOrEmpty(telescope.deviceDescription))
+@if (!string.IsNullOrEmpty(telescope.DeviceDescription))
 {
-    <h4 style="color: green; font-weight: bold;">Connected to this device: @telescope.deviceDescription</h4>
+    <h4 style="color: green; font-weight: bold;">Connected to this device: @telescope.DeviceDescription</h4>
     <h4 style="color: blue; font-weight: bold;">At home?: @telescope.AtHome</h4>
     <button @onclick="GoHome">Go Home</button>
     <button @onclick="DisconnectTelescopeAsync">Disconnect</button>
+    <button @onclick="() => { var device = telescope.AscomDeviceList?.FirstOrDefault(); if (device != null) ConnectCamera(device); }">Connect Camera</button>
+    <button @onclick="GetImage">Get Image</button>
 }
-else if (telescope.ascomDeviceList != null && telescope.ascomDeviceList.Count > 0)
+else if (telescope.AscomDeviceList != null && telescope.AscomDeviceList.Count > 0)
 {
     <h4>Discovered Devices:</h4>
     <table class="table">
@@ -31,7 +34,7 @@ else if (telescope.ascomDeviceList != null && telescope.ascomDeviceList.Count > 
             </tr>
         </thead>
         <tbody>
-            @foreach (var device in telescope.ascomDeviceList)
+            @foreach (var device in telescope.AscomDeviceList)
             {
                 <tr>
                     <td>@device.HostName</td>
@@ -45,17 +48,82 @@ else if (telescope.ascomDeviceList != null && telescope.ascomDeviceList.Count > 
         </tbody>
     </table>
 }
-else if (ASCOM.Alpaca.DeviceManager.Telescopes.ContainsKey(InstanceID))
-{
-    <p>Add your device setup and control functions here</p>
-}
-else
-{
-    <h3>This device does not exist and cannot be configured</h3>
-}
 
-@if (telescope.telescopeConnected)
+@if (telescope.AlpacaCamera != null && telescope.AlpacaCamera.Connected)
 {
+    <h4 style="color: green; font-weight: bold;">Camera Connected</h4>
+
+    <h4>Camera Properties:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>BinX</td><td>@telescope.AlpacaCamera.BinX</td></tr>
+            <tr><td>BinY</td><td>@telescope.AlpacaCamera.BinY</td></tr>
+            <tr><td>CameraXSize</td><td>@telescope.AlpacaCamera.CameraXSize</td></tr>
+            <tr><td>CameraYSize</td><td>@telescope.AlpacaCamera.CameraYSize</td></tr>
+            <tr><td>CanAbortExposure</td><td>@telescope.AlpacaCamera.CanAbortExposure</td></tr>
+            <tr><td>CanAsymmetricBin</td><td>@telescope.AlpacaCamera.CanAsymmetricBin</td></tr>
+            <tr><td>CanGetCoolerPower</td><td>@telescope.AlpacaCamera.CanGetCoolerPower</td></tr>
+            <tr><td>CanPulseGuide</td><td>@telescope.AlpacaCamera.CanPulseGuide</td></tr>
+            <tr><td>CanSetCCDTemperature</td><td>@telescope.AlpacaCamera.CanSetCCDTemperature</td></tr>
+            <tr><td>CanStopExposure</td><td>@telescope.AlpacaCamera.CanStopExposure</td></tr>
+            <tr><td>CCDTemperature</td><td>@telescope.AlpacaCamera.CCDTemperature</td></tr>
+            <tr><td>HasShutter</td><td>@telescope.AlpacaCamera.HasShutter</td></tr>
+            <tr><td>ImageReady</td><td>@telescope.AlpacaCamera.ImageReady</td></tr>
+            <tr><td>MaxADU</td><td>@telescope.AlpacaCamera.MaxADU</td></tr>
+            <tr><td>MaxBinX</td><td>@telescope.AlpacaCamera.MaxBinX</td></tr>
+            <tr><td>MaxBinY</td><td>@telescope.AlpacaCamera.MaxBinY</td></tr>
+            <tr><td>NumX</td><td>@telescope.AlpacaCamera.NumX</td></tr>
+            <tr><td>NumY</td><td>@telescope.AlpacaCamera.NumY</td></tr>
+            <tr><td>PixelSizeX</td><td>@telescope.AlpacaCamera.PixelSizeX</td></tr>
+            <tr><td>PixelSizeY</td><td>@telescope.AlpacaCamera.PixelSizeY</td></tr>
+            <tr><td>StartX</td><td>@telescope.AlpacaCamera.StartX</td></tr>
+            <tr><td>StartY</td><td>@telescope.AlpacaCamera.StartY</td></tr>
+            <tr><td>BayerOffsetX</td><td>@telescope.AlpacaCamera.BayerOffsetX</td></tr>
+            <tr><td>BayerOffsetY</td><td>@telescope.AlpacaCamera.BayerOffsetY</td></tr>
+            <tr><td>CanFastReadout</td><td>@telescope.AlpacaCamera.CanFastReadout</td></tr>
+            <tr><td>ExposureMax</td><td>@telescope.AlpacaCamera.ExposureMax</td></tr>
+            <tr><td>ExposureMin</td><td>@telescope.AlpacaCamera.ExposureMin</td></tr>
+            <tr><td>ExposureResolution</td><td>@telescope.AlpacaCamera.ExposureResolution</td></tr>
+            <tr><td>Gain</td><td>@telescope.AlpacaCamera.Gain</td></tr>
+            <tr><td>GainMax</td><td>@telescope.AlpacaCamera.GainMax</td></tr>
+            <tr><td>GainMin</td><td>@telescope.AlpacaCamera.GainMin</td></tr>
+            <tr><td>ReadoutMode</td><td>@telescope.AlpacaCamera.ReadoutMode</td></tr>
+            <tr><td>SensorType</td><td>@telescope.AlpacaCamera.SensorType</td></tr>
+        </tbody>
+    </table>
+
+    <h4>Camera Capabilities:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>CanAbortExposure</th>
+                <td>CanAsymmetricBin</td>
+                <td>CanFastReadout</td>
+                <td>CanGetCoolerPower</td>
+                <td>CanPulseGuide</td>
+                <td>CanSetCCDTemperature</td>
+                <td>CanStopExposure</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@telescope.AlpacaCamera.CanAbortExposure</td>
+                <td>@telescope.AlpacaCamera.CanAsymmetricBin</td>
+                <td>@telescope.AlpacaCamera.CanFastReadout</td>
+                <td>@telescope.AlpacaCamera.CanGetCoolerPower</td>
+                <td>@telescope.AlpacaCamera.CanPulseGuide</td>
+                <td>@telescope.AlpacaCamera.CanSetCCDTemperature</td>
+                <td>@telescope.AlpacaCamera.CanStopExposure</td>
+            </tr>
+        </tbody>
+    </table>
+
     <h4>Control Telescope</h4>
     <div class="arrow-buttons">
         <button class="arrow up" @onclick="OnUpClick">&#8593;</button>
@@ -92,6 +160,10 @@ else
             background: #d0e0ff;
         }
     </style>
+}
+
+@if (telescope.TelescopeConnected)
+{
     <h4>Devices details:</h4>
     <table class="table">
         <thead>
@@ -187,7 +259,7 @@ else
 
     private void OnUpClick()
     {
-        // TODO: Add logic to move telescope up
+        
     }
     private void OnDownClick()
     {
@@ -195,7 +267,7 @@ else
     }
     private void OnLeftClick()
     {
-        // TODO: Add logic to move telescope left
+
     }
     private void OnRightClick()
     {
@@ -205,5 +277,15 @@ else
     private void GoHome()
     {
         telescope.FindHome();
+    }
+
+    private void ConnectCamera(AscomDevice device)
+    {
+        telescope.ConnectCamera(device);
+    }
+
+    private void GetImage()
+    {
+        telescope.GetCameraImageArrayAsync();
     }
 }

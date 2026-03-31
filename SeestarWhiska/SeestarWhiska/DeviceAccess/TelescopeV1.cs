@@ -2,178 +2,177 @@ using ASCOM.Common.DeviceInterfaces;
 using ASCOM.Alpaca.Discovery;
 using ASCOM.Alpaca.Clients;
 using ASCOM.Common;
+using System.Drawing;
+using OpenCvSharp;
 
 namespace SeestarWhiska.DeviceAccess
 {
     public class TelescopeV1 : ITelescopeV4
     {
-        public AlpacaTelescope? alpacaTelescope { get; set; }
-        public List<AscomDevice>? ascomDeviceList;
-        public bool telescopeConnected = false;
+        public AlpacaTelescope? AlpacaTelescope { get; set; }
+        public AlpacaCamera? AlpacaCamera { get; set; }
+        public List<AscomDevice>? AscomDeviceList;
+        public bool TelescopeConnected = false;
+        public string DeviceDescription = string.Empty;
 
-        // public string deviceName = string.Empty;
-        // public string deviceDriverInfo = string.Empty;
-        // public string deviceSupportedActions = string.Empty;
-        // public string deviceDriverVersion = string.Empty;
-        
-        public string deviceDescription = string.Empty;
-        public bool AtHome => alpacaTelescope != null ? alpacaTelescope.AtHome : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        #region ITelescopeV4 Implementation
+        public bool AtHome => AlpacaTelescope != null ? AlpacaTelescope.AtHome : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanSlew => alpacaTelescope != null ? alpacaTelescope.CanSlew : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanSlew => AlpacaTelescope != null ? AlpacaTelescope.CanSlew : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanSlewAltAz => alpacaTelescope != null ? alpacaTelescope.CanSlewAltAz : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanSlewAltAz => AlpacaTelescope != null ? AlpacaTelescope.CanSlewAltAz : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanSlewAltAzAsync => alpacaTelescope != null ? alpacaTelescope.CanSlewAltAzAsync : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanSlewAltAzAsync => AlpacaTelescope != null ? AlpacaTelescope.CanSlewAltAzAsync : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanSlewAsync => alpacaTelescope != null ? alpacaTelescope.CanSlewAsync : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanSlewAsync => AlpacaTelescope != null ? AlpacaTelescope.CanSlewAsync : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
         public PointingState SideOfPier
         {
-            get => alpacaTelescope != null ? alpacaTelescope.SideOfPier : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
-            set { if (alpacaTelescope != null) alpacaTelescope.SideOfPier = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.SideOfPier : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+            set { if (AlpacaTelescope != null) AlpacaTelescope.SideOfPier = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
         public bool Tracking
         {
-            get => alpacaTelescope != null ? alpacaTelescope.Tracking : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
-            set { if (alpacaTelescope != null) alpacaTelescope.Tracking = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.Tracking : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+            set { if (AlpacaTelescope != null) AlpacaTelescope.Tracking = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
 
-        public bool Connecting => alpacaTelescope != null ? alpacaTelescope.Connected : false;
+        public bool Connecting => AlpacaTelescope != null ? AlpacaTelescope.Connected : false;
 
         public List<StateValue> DeviceState => new List<StateValue>();
 
-        public AlignmentMode AlignmentMode => alpacaTelescope != null ? alpacaTelescope.AlignmentMode : AlignmentMode.AltAz;
+        public AlignmentMode AlignmentMode => AlpacaTelescope != null ? AlpacaTelescope.AlignmentMode : AlignmentMode.AltAz;
 
-        public double Altitude => alpacaTelescope != null ? alpacaTelescope.Altitude : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public double Altitude => AlpacaTelescope != null ? AlpacaTelescope.Altitude : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public double ApertureArea => alpacaTelescope != null ? alpacaTelescope.ApertureArea : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public double ApertureArea => AlpacaTelescope != null ? AlpacaTelescope.ApertureArea : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public double ApertureDiameter => alpacaTelescope != null ? alpacaTelescope.ApertureDiameter : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public double ApertureDiameter => AlpacaTelescope != null ? AlpacaTelescope.ApertureDiameter : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool AtPark => alpacaTelescope != null ? alpacaTelescope.AtPark : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
-        public double Azimuth => alpacaTelescope != null ? alpacaTelescope.Azimuth : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool AtPark => AlpacaTelescope != null ? AlpacaTelescope.AtPark : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public double Azimuth => AlpacaTelescope != null ? AlpacaTelescope.Azimuth : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanFindHome => alpacaTelescope != null ? alpacaTelescope.CanFindHome : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanFindHome => AlpacaTelescope != null ? AlpacaTelescope.CanFindHome : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanPark => alpacaTelescope != null ? alpacaTelescope.CanPark : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanPark => AlpacaTelescope != null ? AlpacaTelescope.CanPark : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanPulseGuide => alpacaTelescope != null ? alpacaTelescope.CanPulseGuide : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanPulseGuide => AlpacaTelescope != null ? AlpacaTelescope.CanPulseGuide : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanSetDeclinationRate => alpacaTelescope != null ? alpacaTelescope.CanSetDeclinationRate : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
-        public bool CanSetGuideRates => alpacaTelescope != null ? alpacaTelescope.CanSetGuideRates : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanSetDeclinationRate => AlpacaTelescope != null ? AlpacaTelescope.CanSetDeclinationRate : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanSetGuideRates => AlpacaTelescope != null ? AlpacaTelescope.CanSetGuideRates : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanSetPark => alpacaTelescope != null ? alpacaTelescope.CanSetPark : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
+        public bool CanSetPark => AlpacaTelescope != null ? AlpacaTelescope.CanSetPark : throw new InvalidOperationException("AlpacaTelescope is not initialized.");
 
-        public bool CanSetPierSide => alpacaTelescope != null ? alpacaTelescope.CanSetPierSide : throw new InvalidOperationException("AlpacaTelescope is not initialized");
-        public bool CanSetRightAscensionRate => alpacaTelescope != null ? alpacaTelescope.CanSetRightAscensionRate : false;
+        public bool CanSetPierSide => AlpacaTelescope != null ? AlpacaTelescope.CanSetPierSide : throw new InvalidOperationException("AlpacaTelescope is not initialized");
+        public bool CanSetRightAscensionRate => AlpacaTelescope != null ? AlpacaTelescope.CanSetRightAscensionRate : false;
 
-        public bool CanSetTracking => alpacaTelescope != null ? alpacaTelescope.CanSetTracking : false;
+        public bool CanSetTracking => AlpacaTelescope != null ? AlpacaTelescope.CanSetTracking : false;
 
-        public bool CanSync => alpacaTelescope != null ? alpacaTelescope.CanSync : false;
+        public bool CanSync => AlpacaTelescope != null ? AlpacaTelescope.CanSync : false;
 
-        public bool CanSyncAltAz => alpacaTelescope != null ? alpacaTelescope.CanSyncAltAz : false;
+        public bool CanSyncAltAz => AlpacaTelescope != null ? AlpacaTelescope.CanSyncAltAz : false;
 
-        public bool CanUnpark => alpacaTelescope != null ? alpacaTelescope.CanUnpark : false;
+        public bool CanUnpark => AlpacaTelescope != null ? AlpacaTelescope.CanUnpark : false;
 
-        public double Declination => alpacaTelescope != null ? alpacaTelescope.Declination : 0.0;
+        public double Declination => AlpacaTelescope != null ? AlpacaTelescope.Declination : 0.0;
 
         public double DeclinationRate
         {
-            get => alpacaTelescope != null ? alpacaTelescope.DeclinationRate : 0.0;
-            set { if (alpacaTelescope != null) alpacaTelescope.DeclinationRate = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.DeclinationRate : 0.0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.DeclinationRate = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
         public bool DoesRefraction
         {
-            get => alpacaTelescope != null ? alpacaTelescope.DoesRefraction : false;
-            set { if (alpacaTelescope != null) alpacaTelescope.DoesRefraction = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.DoesRefraction : false;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.DoesRefraction = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
 
-        public EquatorialCoordinateType EquatorialSystem => alpacaTelescope != null ? alpacaTelescope.EquatorialSystem : EquatorialCoordinateType.J2000;
+        public EquatorialCoordinateType EquatorialSystem => AlpacaTelescope != null ? AlpacaTelescope.EquatorialSystem : EquatorialCoordinateType.J2000;
 
-        public double FocalLength => alpacaTelescope != null ? alpacaTelescope.FocalLength : 0.0;
+        public double FocalLength => AlpacaTelescope != null ? AlpacaTelescope.FocalLength : 0.0;
 
         public double GuideRateDeclination
         {
-            get => alpacaTelescope != null ? alpacaTelescope.GuideRateDeclination : 0.0;
-            set { if (alpacaTelescope != null) alpacaTelescope.GuideRateDeclination = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.GuideRateDeclination : 0.0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.GuideRateDeclination = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
         public double GuideRateRightAscension
         {
-            get => alpacaTelescope != null ? alpacaTelescope.GuideRateRightAscension : 0.0;
-            set { if (alpacaTelescope != null) alpacaTelescope.GuideRateRightAscension = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.GuideRateRightAscension : 0.0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.GuideRateRightAscension = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
 
-        public bool IsPulseGuiding => alpacaTelescope != null ? alpacaTelescope.IsPulseGuiding : false;
+        public bool IsPulseGuiding => AlpacaTelescope != null ? AlpacaTelescope.IsPulseGuiding : false;
 
-        public double RightAscension => alpacaTelescope != null ? alpacaTelescope.RightAscension : 0.0;
+        public double RightAscension => AlpacaTelescope != null ? AlpacaTelescope.RightAscension : 0.0;
 
         public double RightAscensionRate
         {
-            get => alpacaTelescope != null ? alpacaTelescope.RightAscensionRate : 0.0;
-            set { if (alpacaTelescope != null) alpacaTelescope.RightAscensionRate = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.RightAscensionRate : 0.0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.RightAscensionRate = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
 
-        public double SiderealTime => alpacaTelescope != null ? alpacaTelescope.SiderealTime : 0.0;
+        public double SiderealTime => AlpacaTelescope != null ? AlpacaTelescope.SiderealTime : 0.0;
 
         public double SiteElevation
         {
-            get => alpacaTelescope != null ? alpacaTelescope.SiteElevation : 0.0;
-            set { if (alpacaTelescope != null) alpacaTelescope.SiteElevation = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.SiteElevation : 0.0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.SiteElevation = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
         public double SiteLatitude
         {
-            get => alpacaTelescope != null ? alpacaTelescope.SiteLatitude : 0.0;
-            set { if (alpacaTelescope != null) alpacaTelescope.SiteLatitude = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.SiteLatitude : 0.0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.SiteLatitude = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
         public double SiteLongitude
         {
-            get => alpacaTelescope != null ? alpacaTelescope.SiteLongitude : 0.0;
-            set { if (alpacaTelescope != null) alpacaTelescope.SiteLongitude = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.SiteLongitude : 0.0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.SiteLongitude = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
 
-        public bool Slewing => alpacaTelescope != null ? alpacaTelescope.Slewing : false;
+        public bool Slewing => AlpacaTelescope != null ? AlpacaTelescope.Slewing : false;
 
         public short SlewSettleTime
         {
-            get => alpacaTelescope != null ? alpacaTelescope.SlewSettleTime : (short)0;
-            set { if (alpacaTelescope != null) alpacaTelescope.SlewSettleTime = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.SlewSettleTime : (short)0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.SlewSettleTime = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
         public double TargetDeclination
         {
-            get => alpacaTelescope != null ? alpacaTelescope.TargetDeclination : 0.0;
-            set { if (alpacaTelescope != null) alpacaTelescope.TargetDeclination = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.TargetDeclination : 0.0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.TargetDeclination = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
         public double TargetRightAscension
         {
-            get => alpacaTelescope != null ? alpacaTelescope.TargetRightAscension : 0.0;
-            set { if (alpacaTelescope != null) alpacaTelescope.TargetRightAscension = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.TargetRightAscension : 0.0;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.TargetRightAscension = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
         public DriveRate TrackingRate
         {
-            get => alpacaTelescope != null ? alpacaTelescope.TrackingRate : DriveRate.Lunar;
-            set { if (alpacaTelescope != null) alpacaTelescope.TrackingRate = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.TrackingRate : DriveRate.Lunar;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.TrackingRate = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
 
-        public ITrackingRates TrackingRates => alpacaTelescope != null ? alpacaTelescope.TrackingRates : null;
+        public ITrackingRates TrackingRates => AlpacaTelescope != null ? AlpacaTelescope.TrackingRates : null;
 
         public DateTime UTCDate
         {
-            get => alpacaTelescope != null ? alpacaTelescope.UTCDate : DateTime.MinValue;
-            set { if (alpacaTelescope != null) alpacaTelescope.UTCDate = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
+            get => AlpacaTelescope != null ? AlpacaTelescope.UTCDate : DateTime.MinValue;
+            set { if (AlpacaTelescope != null) AlpacaTelescope.UTCDate = value; else throw new InvalidOperationException("AlpacaTelescope is not initialized."); }
         }
         public bool Connected { get; set; }
 
-        public string Description => alpacaTelescope != null ? alpacaTelescope.Description : string.Empty;
+        public string Description => AlpacaTelescope != null ? AlpacaTelescope.Description : string.Empty;
 
-        public string DriverInfo => alpacaTelescope != null ? alpacaTelescope.DriverInfo : string.Empty;
+        public string DriverInfo => AlpacaTelescope != null ? AlpacaTelescope.DriverInfo : string.Empty;
 
-        public string DriverVersion => alpacaTelescope != null ? alpacaTelescope.DriverVersion : string.Empty;
+        public string DriverVersion => AlpacaTelescope != null ? AlpacaTelescope.DriverVersion : string.Empty;
 
-        public short InterfaceVersion => alpacaTelescope != null ? alpacaTelescope.InterfaceVersion : (short)0;
+        public short InterfaceVersion => AlpacaTelescope != null ? AlpacaTelescope.InterfaceVersion : (short)0;
 
-        public string Name => alpacaTelescope != null ? alpacaTelescope.Name : string.Empty;
+        public string Name => AlpacaTelescope != null ? AlpacaTelescope.Name : string.Empty;
 
-        public IList<string> SupportedActions => alpacaTelescope != null ? alpacaTelescope.SupportedActions : new List<string>();
+        public IList<string> SupportedActions => AlpacaTelescope != null ? AlpacaTelescope.SupportedActions : new List<string>();
 
         public void AbortSlew()
         {
@@ -210,36 +209,6 @@ namespace SeestarWhiska.DeviceAccess
             throw new NotImplementedException();
         }
 
-        public async Task DiscoverDevicesAsync()
-        {
-            ascomDeviceList = await AlpacaDiscovery.GetAscomDevicesAsync(DeviceTypes.Telescope);
-        }
-
-        public async void ConnectAsync(AscomDevice telescope)
-        {
-
-            // This returns a list of ConfiguredDevice objects with device info
-            // foreach (var device in devices)
-            // {
-            //     Console.WriteLine($"Device: {device.HostName}, Type: {device.IpAddress}");
-            // }
-
-            // var telescope = ascomDeviceList.FirstOrDefault(d => d.IpAddress.Equals("192.168.1.38"));
-
-            alpacaTelescope = AlpacaClient.GetDevice<AlpacaTelescope>(telescope);
-            if (alpacaTelescope != null)
-            {
-                // Get the device's description
-                alpacaTelescope.Connected = true;
-                telescopeConnected = alpacaTelescope.Connected;
-                deviceDescription = alpacaTelescope.Description;
-
-
-                // Disconnect form the Alpaca device
-                //alpacaTelescope.Connected = false;
-            }
-        }
-
         public PointingState DestinationSideOfPier(double RightAscension, double Declination)
         {
             throw new NotImplementedException();
@@ -247,24 +216,25 @@ namespace SeestarWhiska.DeviceAccess
 
         public void Disconnect()
         {
-            this.alpacaTelescope.Connected = false;
-            telescopeConnected = false;
+            this.AlpacaTelescope.Connected = false;
+            TelescopeConnected = false;
             this.Dispose();
         }
 
         public void Dispose()
         {
-            this.alpacaTelescope.Dispose();
+            this.AlpacaTelescope.Dispose();
         }
 
         public void FindHome()
         {
-            this.alpacaTelescope.FindHome();
+            this.AlpacaTelescope.FindHome();
         }
 
-        public void MoveAxis(TelescopeAxis Axis, double Rate)
+        public void MoveAxis(TelescopeAxis axis, double rate)
         {
-            throw new NotImplementedException();
+            System.Console.WriteLine($"Axis {axis.ToString()} with rate: {rate.ToString()}");
+            this.AlpacaTelescope.MoveAxis(axis, rate);
         }
 
         public void Park()
@@ -336,5 +306,121 @@ namespace SeestarWhiska.DeviceAccess
         {
             throw new NotImplementedException();
         }
+
+        #endregion
+
+        #region Additional Methods
+
+        public async Task DiscoverDevicesAsync()
+        {
+            AscomDeviceList = await AlpacaDiscovery.GetAscomDevicesAsync(DeviceTypes.Telescope);
+            AscomDeviceList = AscomDeviceList.Where(d => !d.IpAddress.Equals("127.0.0.1")).ToList();
+        }
+
+        public async void ConnectAsync(AscomDevice telescope)
+        {
+            AlpacaTelescope = AlpacaClient.GetDevice<AlpacaTelescope>(telescope);
+            if (AlpacaTelescope != null)
+            {
+                AlpacaTelescope.Connected = true;
+                TelescopeConnected = AlpacaTelescope.Connected;
+                DeviceDescription = AlpacaTelescope.Description;
+            }
+        }
+
+        public void ConnectCamera(AscomDevice telescope)
+        {
+            AlpacaCamera = AlpacaClient.GetDevice<AlpacaCamera>(telescope);
+            if (telescope != null)
+            {
+                AlpacaCamera.Connected = true;
+            }
+        }
+
+        public object? GetCameraImageArrayAsync(bool isColorImage = true)
+        {
+            if (AlpacaCamera != null)
+            {
+                AlpacaCamera.Gain = 0;
+                int width = 1920;
+                int height = 1080;
+                
+                //AlpacaCamera.StartExposure(0.0001, false);
+                AlpacaCamera.StartExposure(1, false);
+                while (!AlpacaCamera.ImageReady) 
+                { 
+                    Thread.Sleep(100); 
+                }
+
+                object? imageObj = AlpacaCamera.ImageArray;
+                int[,] image = imageObj as int[,];                   
+
+                // if (image != null)
+                // {
+                //     using (var writer = new System.IO.StreamWriter("output.csv"))
+                //     {
+                //         for (int y = 0; y < height; y++)
+                //         {
+                //             string[] row = new string[width];
+                //             for (int x = 0; x < width; x++)
+                //             {
+                //                 row[x] = image[y, x].ToString();
+                //             }
+                //             writer.WriteLine(string.Join(",", row));
+                //         }
+                //     }
+                // }
+
+                int min = int.MaxValue;
+                int max = int.MinValue;
+
+                for (int y = 0; y < height; y++)
+                    for (int x = 0; x < width; x++)
+                    {
+                        int v = image[y, x];
+                        if (v < min) min = v;
+                        if (v > max) max = v;
+                    }
+                double range = (max > min) ? (max - min) : 1.0;
+
+                if (isColorImage)
+                {
+                    int rows = image.GetLength(0);
+                    int cols = image.GetLength(1);
+
+                    Mat rawImage = new Mat(rows, cols, MatType.CV_32SC1);
+                    Mat rgbImage = new Mat();
+
+                    for (int i = 0; i < rows; i++)
+                    {
+                        for (int j = 0; j < cols; j++)
+                        {
+                            rawImage.Set(i, j, image[i, j]);
+                        }
+                    }
+
+                    Cv2.CvtColor(rawImage, rgbImage, ColorConversionCodes.BayerRG2BGR);
+                    Cv2.ImWrite("photo_rgb.png", rgbImage);
+                }
+
+                // Create and save normalized bitmap
+                using (Bitmap bmp = new Bitmap(width, height))
+                {
+                    for (int y = 0; y < height; y++)
+                        for (int x = 0; x < width; x++)
+                        {
+                            int v = (int)Math.Round((image[y, x] - min) * 255.0 / range);
+                            v = Math.Max(0, Math.Min(255, v));
+                            bmp.SetPixel(x, y, Color.FromArgb(v, v, v));
+                        }
+                    bmp.Save($"photo.png", System.Drawing.Imaging.ImageFormat.Png);
+                }
+
+                return image;
+            }
+
+            return null;
+        }
+        #endregion
     }
 }
